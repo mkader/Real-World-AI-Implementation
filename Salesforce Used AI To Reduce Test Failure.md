@@ -4,10 +4,9 @@
 
 ### The Problem
   * Salesforce runs a huge automated testing pipeline: ~6 million tests per day, covering ~78 billion possible test combinations. 
-  * They generate ~150,000 test failures each month, with ~27,000 code changelists submitted daily. 
-  * Before AI automation, engineers spent hours manually to resolve test failures: going through logs, changelists, internal bug tracking systems (GUS). 
-  * On average, it took seven days to resolve a test failure. 
-
+  * They deal with ~150,000 test failures per month, with ~27,000 code changelists (code changes) submitted daily. 
+  * Before AI automation, develoeprs spent hours manually - navigating logs, change sets, and bug-tracking systems (GUS. 
+ 
 ### Goals for the AI System
   * Reduce the manual effort of diagnosing failures. 
   * Provide context-aware, clear recommendations to developers that help them fix issues quickly. 
@@ -24,19 +23,18 @@
     * FAISS is a library that allows very fast similarity searches between data represented as vectors
     * When a new failure shows up, they perfoms a vector similarity search for similar historical failures. 
     * <img width="700" height="400" alt="image" src="https://github.com/user-attachments/assets/d04000ac-a81e-4598-8933-53050c7a79ca" />
-  2. Contextual Embeddings & Parsing: They parse messy error logs / stack traces, clean them up, then create contextual embeddings (representations) so they can compare new errors to past ones meaningfully. 
+  2. Contextual Embeddings & Parsing: (messy) Error logs and stack traces are cleaned and contextual embedded (representations). so AT can compare new errors to past ones meaningfully. 
   3. Asynchronous & Decoupled Pipelines: The triage system runs separately (not blocking their CI/CD), so it can run in parallel and return suggestions fast. 
   4. Hybrid Approach - LLM Reasoning and Semantic Search: After finding similar past failures (via semantic search), an LLM refines and reason over them to generate clear, context-specific guidance. 
 
 ### How They Built It
-  * They used Cursor, an AI-assisted pair programming and code retrieval tool  to build the TF Triage Agent.
-  * This helped them develop faster (built in 4–6 weeks), normally this could have taken several months of manual work
-  * Cursor helped engineers find existing code patterns, avoid reinventing the wheel, and explore scaling / architectural options more quickly. 
-  * Using Cursor also freed up engineers to focus on the core failure triage logic, instead of boilerplate or legacy-code copying. 
+  * They used Cursor, an AI-assisted pair-programming tool, to help build the TF Triage Agent.
+  * With Cursor, what could have taken “months to build” was delivered in 4–6 weeks.
+  * Cursor helped by auto-generating boilerplate / retrieval code, letting engineers focus on the core triage logic.
   * <img width="700" height="400" alt="image" src="https://github.com/user-attachments/assets/687f0b5f-80b5-4062-9539-159fa1a8db9f" />
 
 ### Results & Impact
-  * Deploying the TF Triage Agent cut test failure resolution time by ~30%. 
+  * After deployment, test-failure (TF) resolution time dropped by ~30%, from ~7 days to 2–3 days on average
   * It significantly boosted developer productivity, reduced friction, and lowered the backlog of failures. 
   * They rolled it out gradually and carefully to build trust, using real data to show that the suggestions were useful. 
 
