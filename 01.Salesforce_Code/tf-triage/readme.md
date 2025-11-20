@@ -26,6 +26,7 @@ tf-triage/
 * build_index.py
   - Build embeddings for historical failures and write FAISS index + metadata file.
   - Run ```python build_index.py```
+  - <img width="1531" height="70" alt="image" src="https://github.com/user-attachments/assets/69bb7b3d-3677-4ae9-9c3a-7c8c7b2b0836" />
 * retriever.py
   - Encapsulates loading the FAISS index, encoding queries, and returning nearest historical matches.
 * llm_reasoner.py
