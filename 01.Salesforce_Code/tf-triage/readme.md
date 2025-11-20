@@ -27,6 +27,7 @@ tf-triage/
   - Build embeddings for historical failures and write FAISS index + metadata file.
   - Run ```python build_index.py```
   - <img width="1531" height="70" alt="image" src="https://github.com/user-attachments/assets/69bb7b3d-3677-4ae9-9c3a-7c8c7b2b0836" />
+  - ![alt text](img/build_index.png)
 * retriever.py
   - Encapsulates loading the FAISS index, encoding queries, and returning nearest historical matches.
 * llm_reasoner.py
@@ -49,7 +50,9 @@ tf-triage/
   - Response returns immediately; triage worker prints & persists the recommendation.
   - <img width="878" height="441" alt="image" src="https://github.com/user-attachments/assets/da95176f-f87a-49c7-a74e-a88fedc0b27c" />
   - <img width="1752" height="447" alt="image" src="https://github.com/user-attachments/assets/39e35893-d26e-412c-a6f4-963722072120" />
-
+  - ![alt text](img/uvicorn.png)
+  - ![alt text](img/postman.png)
+  - ![alt text](img/newfiles.png)
 * run_demo.sh
   - Example script to build index and start the API:
     ```

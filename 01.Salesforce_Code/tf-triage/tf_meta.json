@@ -1,0 +1,17 @@
+[
+  {
+    "id": "TF-001",
+    "error_log": "NullPointerException in PaymentService on line 42 - PaymentContext is null",
+    "resolution": "Initialize payment context before calling validate(). Add null-check in PaymentService.validate()."
+  },
+  {
+    "id": "TF-002",
+    "error_log": "Timeout while connecting to Redis cache during order processing",
+    "resolution": "Increase Redis connection pool size or add retry/backoff for cache connectivity."
+  },
+  {
+    "id": "TF-003",
+    "error_log": "AssertionError: expected 200 but got 500 in OrderController.handleOrder",
+    "resolution": "Fix upstream service dependency returning 500. Add defensive check and retry."
+  }
+]
