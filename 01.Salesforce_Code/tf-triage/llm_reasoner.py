@@ -1,12 +1,7 @@
 # llm_reasoner.py
 import os
-import openai
-import textwrap
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    print("Warning: OPENAI_API_KEY not set. LLM calls will fail unless set.")
-openai.api_key = OPENAI_API_KEY
+from typing import List
+from openai import OpenAI
 
 def compose_prompt(new_log, matches):
     lines = [
@@ -21,19 +16,31 @@ def compose_prompt(new_log, matches):
         "Top similar historical failures (id, error_log, resolution):"
     ]
     for m in matches:
-        e = m["entry"]
-        lines.append(f"- {e.get('id','?')}: {e.get('error_log','')}\n  resolution: {e.get('resolution','')}\n  similarity_score: {m['score']:.4f}")
+        e = m.get("entry", {})
+        lines.append(
+            f"- {e.get('id','?')}: {e.get('error_log','')}\n  resolution: {e.get('resolution','')}\n  similarity_score: {m.get('score',0):.4f}"
+        )
     lines.append("\nAnswer in bullet points, short, technical.")
     return "\n".join(lines)
 
 def get_recommendation(new_log, matches, model="gpt-4o-mini", max_tokens=500):
-    prompt = compose_prompt(new_log, matches)
-    # Using Chat Completions style
-    resp = openai.ChatCompletion.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=max_tokens,
-        temperature=0.0
+    endpoint = "https://enus2.openai.azure.com/openai/v1"
+    deployment_name = "EnGPT-5"
+    api_key = "B2s1q...3dQQ"
+
+    client = OpenAI(
+        base_url=endpoint,
+        api_key=api_key
     )
-    text = resp["choices"][0]["message"]["content"].strip()
+
+    prompt = compose_prompt(new_log, matches)
+
+    # Using Chat Completions style
+    resp = client.chat.completions.create(
+        model=deployment_name,
+        messages=[{"role": "user", "content": prompt}]#,
+        #max_tokens=max_tokens,
+        #temperature=0.0
+    )
+    text = resp.choices[0].message.content.strip()
     return text
