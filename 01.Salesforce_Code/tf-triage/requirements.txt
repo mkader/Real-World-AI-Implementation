@@ -1,8 +1,8 @@
-fastapi==0.95.2
-uvicorn==0.22.0
+fastapi=0.113.0
+uvicorn==0.30.0
 sentence-transformers
 faiss-cpu
 openai==1.0.0
-pydantic==1.10.7
+pydantic==2.9.2
 aiofiles
 python-dotenv==1.0.0
