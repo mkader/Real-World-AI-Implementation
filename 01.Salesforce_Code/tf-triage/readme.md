@@ -46,6 +46,9 @@ tf-triage/
     Body: {"error_log": "NullPointerException at PaymentService.validate() when processing order batch..."}
     ```
   - Response returns immediately; triage worker prints & persists the recommendation.
+  - <img width="878" height="441" alt="image" src="https://github.com/user-attachments/assets/da95176f-f87a-49c7-a74e-a88fedc0b27c" />
+  - <img width="1752" height="447" alt="image" src="https://github.com/user-attachments/assets/39e35893-d26e-412c-a6f4-963722072120" />
+
 * run_demo.sh
   - Example script to build index and start the API:
     ```
