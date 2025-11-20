@@ -8,17 +8,18 @@
 * Updated Python snippets (storage, triage_api, worker) that wire PostgreSQL + Redis.
 * Everything is ready to run with ```docker compose up --build```.
 
-1. Dockerfile
-2. docker-compose.yml
-3. requirements.txt (updated)
-4. .env.example (copy to .env and edit)
-5. Updated storage.py (Postgres via SQLAlchemy)
-6. Updated triage_api.py (enqueue to RQ)
-  - Note: queue.enqueue("worker.process_failure", ...) references the process_failure function in worker.py. RQ imports the module by name.
-7. worker.py (RQ worker tasks + triage logic)
-8. retriever.py (adjusted to read env paths)
-9.  build_index.py (ensure it writes into /app/index_data)
-10. llm_reasoner.py (unchanged, but reads OPENAI_API_KEY env var)
+* Project structure
+    1. Dockerfile
+    2. docker-compose.yml
+    3. requirements.txt (updated)
+    4. .env.example (copy to .env and edit)
+    5. Updated storage.py (Postgres via SQLAlchemy)
+    6. Updated triage_api.py (enqueue to RQ)
+        - Note: queue.enqueue("worker.process_failure", ...) references the process_failure function in worker.py. RQ imports the module by name.
+    7. worker.py (RQ worker tasks + triage logic)
+    8. retriever.py (adjusted to read env paths)
+    9.  build_index.py (ensure it writes into /app/index_data)
+    10. llm_reasoner.py (unchanged, but reads OPENAI_API_KEY env var)
 
 ### Quick start (how to run)
   * Copy .env.example to .env and set OPENAI_API_KEY (if you want real LLM calls).
