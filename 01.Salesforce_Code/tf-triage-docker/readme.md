@@ -44,7 +44,3 @@
   * The image currently runs build_index.py manually — for heavy embedding downloads you may prefer to prebuild the index and mount it into the container/volume instead of building in image build.
   * FAISS is CPU-based here (faiss-cpu). For large-scale production consider vector DBs (Milvus, Qdrant, Pinecone) and GPU FAISS builds.
   * The LLM calls use openai.ChatCompletion — ensure you have API key or replace with your internal model endpoint.
-
-Produce a simplified UI (Angular) to show matches + accept/feedback flows.
-
-Which of these would you like next?
