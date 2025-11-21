@@ -76,9 +76,12 @@ tf-triage-scalable/
 2. Build images: ```make build```
 3. Start services (detached): ```make up```
 4. To build/rebuild index manually:```make index-rebuild```
-5. 5. To process unindexed failures (one batch):```make index-worker```
+5. To process unindexed failures (one batch):```make index-worker```
 5. Start Angular UI (optional):
     ```
+    docker compose down
+    docker compose up --build
+
     cd angular-ui
     npm install
     npm start

@@ -1,4 +1,5 @@
 import os
+import json
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -12,6 +13,30 @@ EMBED_MODEL = os.getenv("EMBED_MODEL", "all-MiniLM-L6-v2")
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", "5000"))
 HNSW_M = int(os.getenv("HNSW_M", "32"))
 HNSW_EFCONSTRUCTION = int(os.getenv("HNSW_EFCONSTRUCTION", "200"))
+SAMPLE_DATA_PATH = Path("/app/sample_data/historical_failures.json")
+
+def load_sample_data():
+    """Load sample data into database if it exists and database is empty."""
+    if not SAMPLE_DATA_PATH.exists():
+        print(f"No sample data found at {SAMPLE_DATA_PATH}")
+        return
+    
+    with SAMPLE_DATA_PATH.open("r") as f:
+        data = json.load(f)
+    
+    if not data:
+        print("Sample data file is empty")
+        return
+    
+    with engine.begin() as conn:
+        for item in data:
+            conn.execute(
+                text("INSERT INTO failures (error_log, indexed) VALUES (:log, false)"),
+                {"log": item["error_log"]}
+            )
+    
+    print(f"Loaded {len(data)} sample failures into database")
+
 
 def fetch_total_count():
     with engine.connect() as conn:
@@ -30,8 +55,21 @@ def build():
 
     model = SentenceTransformer(EMBED_MODEL)
     total = fetch_total_count()
+    
+    # Load sample data if database is empty
     if total == 0:
-        print("No failures to index.")
+        print("Database is empty. Loading sample data...")
+        load_sample_data()
+        total = fetch_total_count()
+    
+    if total == 0:
+        print("No failures to index. Creating empty index...")
+        # Create empty index with a default dimension (384 for all-MiniLM-L6-v2)
+        d = 384
+        index = faiss.IndexHNSWFlat(d, HNSW_M)
+        index.hnsw.efConstruction = HNSW_EFCONSTRUCTION
+        faiss.write_index(index, str(INDEX_PATH))
+        print(f"Empty index created at {INDEX_PATH}")
         return
 
     # Temporary collect vectors dims to know d

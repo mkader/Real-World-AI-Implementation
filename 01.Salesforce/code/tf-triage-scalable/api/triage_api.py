@@ -2,6 +2,7 @@
 import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from sqlalchemy import text
 from api.db import init_db
 from api.retriever import Retriever
 from api.worker import process_unindexed
@@ -62,3 +63,15 @@ def feedback(payload: dict):
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+from api.retriever import retrieve_similar_failures
+from api.llm_reasoner import explain_failure
+
+@app.post("/query")
+def query_failure(error_log: str):
+    matches = retrieve_similar_failures(error_log)
+    reasoning = explain_failure(error_log, matches)
+    return {
+        "matches": matches,
+        "model_reasoning": reasoning
+    }

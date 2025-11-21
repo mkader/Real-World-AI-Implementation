@@ -22,8 +22,8 @@ class Retriever:
             self.index.hnsw.efSearch = HNSW_EFSEARCH
         self.model = SentenceTransformer(EMBED_MODEL)
 
-    def search(self, text, top_k=5):
-        q = self.model.encode([text], convert_to_numpy=True).astype("float32")
+    def search(self, query_text, top_k=5):
+        q = self.model.encode([query_text], convert_to_numpy=True).astype("float32")
         faiss.normalize_L2(q)
         k = min(top_k, int(self.index.ntotal))
         if k == 0:
