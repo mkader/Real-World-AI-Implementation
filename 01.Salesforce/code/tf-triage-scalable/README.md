@@ -75,10 +75,9 @@ tf-triage-scalable/
 1. copy `.env.example` -> `.env` and update keys (OPENAI_API_KEY optional)
 2. Build images: ```make build```
 3. Start services (detached): ```make up```
-    - Option A: start with prebuild index:
-        - `index-builder` runs automatically if `make up` using docker-compose file above; 
-    - otherwise run: ```make index-rebuild```
-4. Start Angular UI (optional):
+4. To build/rebuild index manually:```make index-rebuild```
+5. 5. To process unindexed failures (one batch):```make index-worker```
+5. Start Angular UI (optional):
     ```
     cd angular-ui
     npm install
@@ -86,13 +85,14 @@ tf-triage-scalable/
     ```
     * Visit `http://localhost:4200` (CORS may need to be handled if using different ports).
 
-5. Submit a failure:
+6. Submit a failure:
     ```
     curl -X POST http://localhost:8000/submit_failure
     -H "Content-Type: application/json" -d '{"error_log":"NullPointerException at PaymentService.validate()"}'
     ```
-6. Search: ```curl "http://localhost:8000/search?q=NullPointerException%20PaymentService"```
-7. Trigger worker to index unindexed entries: ```make index-worker```
+7. Search: ```curl "http://localhost:8000/search?q=NullPointerException&k=5"```
+
+8. Trigger worker to index unindexed entries: ```make index-worker```
 
 
 ### Notes

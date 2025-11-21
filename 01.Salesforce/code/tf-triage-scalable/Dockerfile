@@ -1,18 +1,17 @@
 FROM python:3.11-slim
 
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential libpq-dev git curl && rm -rf /var/lib/apt/lists/*
-
+# Set working directory
 WORKDIR /app
-COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
 
+# Copy all code
 COPY . /app
 
-RUN mkdir -p /app/index_data
-VOLUME ["/app/index_data"]
+# Install dependencies
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-ENV PYTHONUNBUFFERED=1
+# Ensure Python can import the "api" package
+ENV PYTHONPATH=/app
 
-CMD ["uvicorn", "api.triage_api:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default command (overridden by docker-compose)
+CMD ["python", "api/build_index.py"]

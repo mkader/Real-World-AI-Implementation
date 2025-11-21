@@ -1,6 +1,4 @@
-# api/build_index.py
 import os
-import math
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -10,7 +8,6 @@ from pathlib import Path
 
 INDEX_DIR = Path(os.getenv("INDEX_DIR", "/app/index_data"))
 INDEX_PATH = INDEX_DIR / "tf_hnsw.index"
-META_PATH = INDEX_DIR / "faiss_map.json"
 EMBED_MODEL = os.getenv("EMBED_MODEL", "all-MiniLM-L6-v2")
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", "5000"))
 HNSW_M = int(os.getenv("HNSW_M", "32"))
@@ -48,22 +45,9 @@ def build():
     index = faiss.IndexHNSWFlat(d, HNSW_M)
     index.hnsw.efConstruction = HNSW_EFCONSTRUCTION
 
-    # we normalize later for cosine-like behavior using inner product
-    faiss.normalize_L2(emb)
-    index.add(emb.astype("float32"))
-
-    # map faiss_id -> failure_id
-    faiss_id = index.ntotal - 1
-    mappings = []
-    for r in first_batch:
-        mappings.append((index.ntotal - len(first_batch) + mappings.__len__() + 1, r[0]))  # corrected below
-
     # The above mapping logic is simpler to do by tracking appended ids:
     current_faiss_id = 0
     mappings = []
-    # Add first batch properly and map
-    index = faiss.IndexHNSWFlat(d, HNSW_M)
-    index.hnsw.efConstruction = HNSW_EFCONSTRUCTION
     # add in batches
     offset = 0
     while offset < total:

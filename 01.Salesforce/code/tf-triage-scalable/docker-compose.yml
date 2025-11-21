@@ -1,68 +1,87 @@
 version: "3.9"
+
 services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_USER: triage
-      POSTGRES_PASSWORD: triagepass
-      POSTGRES_DB: triagedb
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: devpass
+      POSTGRES_DB: tfdb
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U triage"]
+      test: ["CMD-SHELL", "pg_isready -U dev -d tfdb"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+    ports:
+      - "5432:5432"
 
   redis:
     image: redis:7
     volumes:
       - redisdata:/data
-
-  api:
-    build: .
     ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql+psycopg2://triage:triagepass@postgres:5432/triagedb
-      - REDIS_URL=redis://redis:6379/0
-      - INDEX_DIR=/app/index_data
-      - EMBED_MODEL=all-MiniLM-L6-v2
-    volumes:
-      - ./:/app
-      - indexdata:/app/index_data
-    depends_on:
-      - postgres
-      - redis
-
-  worker:
-    build: .
-    command: ["rq", "worker", "triage"]
-    environment:
-      - DATABASE_URL=postgresql+psycopg2://triage:triagepass@postgres:5432/triagedb
-      - REDIS_URL=redis://redis:6379/0
-      - INDEX_DIR=/app/index_data
-      - EMBED_MODEL=all-MiniLM-L6-v2
-    volumes:
-      - ./:/app
-      - indexdata:/app/index_data
-    depends_on:
-      - postgres
-      - redis
+      - "6379:6379"
 
   index-builder:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: ["python", "api/build_index.py"]
-    environment:
-      - DATABASE_URL=postgresql+psycopg2://triage:triagepass@postgres:5432/triagedb
-      - INDEX_DIR=/app/index_data
-      - EMBED_MODEL=all-MiniLM-L6-v2
     volumes:
+      - ./sample_data:/app/sample_data
       - indexdata:/app/index_data
     depends_on:
       postgres:
         condition: service_healthy
+    environment:
+      PYTHONPATH: /app
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: devpass
+      POSTGRES_DB: tfdb
+      POSTGRES_HOST: postgres
     restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["uvicorn", "api.triage_api:app", "--host", "0.0.0.0", "--port", "8000"]
+    depends_on:
+      index-builder:
+        condition: service_completed_successfully
+    volumes:
+      - ./sample_data:/app/sample_data
+      - indexdata:/app/index_data
+    environment:
+      PYTHONPATH: /app
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: devpass
+      POSTGRES_DB: tfdb
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+    ports:
+      - "8000:8000"
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "api/worker.py"]
+    depends_on:
+      api:
+        condition: service_started
+    volumes:
+      - ./sample_data:/app/sample_data
+      - indexdata:/app/index_data
+    environment:
+      PYTHONPATH: /app
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: devpass
+      POSTGRES_DB: tfdb
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
 
 volumes:
   pgdata:

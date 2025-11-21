@@ -26,6 +26,7 @@ def ensure_index(d=None):
     return faiss.read_index(str(INDEX_PATH))
 
 def process_unindexed(batch_size=BATCH_SIZE):
+    init_db()
     # find unindexed failures
     with engine.connect() as conn:
         rows = conn.execute(text("SELECT id, error_log FROM failures WHERE indexed = false ORDER BY id LIMIT :lim"), {"lim": batch_size}).all()
