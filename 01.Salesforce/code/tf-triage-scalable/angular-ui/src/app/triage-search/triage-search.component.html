@@ -1,0 +1,18 @@
+<div class="container">
+  <h2>TF Triage — Search</h2>
+  <textarea [(ngModel)]="query" placeholder="Paste failure log here"></textarea>
+  <div>
+    <button (click)="search()" [disabled]="loading">Search</button>
+    <button (click)="submitFailure()">Submit as new failure</button>
+  </div>
+
+  <div *ngIf="results.length">
+    <h3>Matches</h3>
+    <div *ngFor="let r of results" class="card">
+      <pre>{{ r.error_log }}</pre>
+      <div>Score: {{ r.score | number:'1.4-4' }}</div>
+      <button (click)="feedback(r.failure_id, true)">👍 Useful</button>
+      <button (click)="feedback(r.failure_id, false)">👎 Not Useful</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,70 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: triage
+      POSTGRES_PASSWORD: triagepass
+      POSTGRES_DB: triagedb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U triage"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    volumes:
+      - redisdata:/data
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://triage:triagepass@postgres:5432/triagedb
+      - REDIS_URL=redis://redis:6379/0
+      - INDEX_DIR=/app/index_data
+      - EMBED_MODEL=all-MiniLM-L6-v2
+    volumes:
+      - ./:/app
+      - indexdata:/app/index_data
+    depends_on:
+      - postgres
+      - redis
+
+  worker:
+    build: .
+    command: ["rq", "worker", "triage"]
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://triage:triagepass@postgres:5432/triagedb
+      - REDIS_URL=redis://redis:6379/0
+      - INDEX_DIR=/app/index_data
+      - EMBED_MODEL=all-MiniLM-L6-v2
+    volumes:
+      - ./:/app
+      - indexdata:/app/index_data
+    depends_on:
+      - postgres
+      - redis
+
+  index-builder:
+    build: .
+    command: ["python", "api/build_index.py"]
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://triage:triagepass@postgres:5432/triagedb
+      - INDEX_DIR=/app/index_data
+      - EMBED_MODEL=all-MiniLM-L6-v2
+    volumes:
+      - indexdata:/app/index_data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  pgdata:
+  redisdata:
+  indexdata:
